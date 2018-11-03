@@ -1,5 +1,8 @@
 import random
 from math import gcd
+import json
+import base64
+import array
 def fermat_test_prime(n, times=3):
     '''
         if random number k < n 
@@ -20,10 +23,8 @@ def fermat_test_prime(n, times=3):
             return False
     return True
 
-def generate_prime():
-    low_bound = 2**500
-    high_bound = 2**550
-
+def generate_prime(low_bound=2**1000, high_bound=2**1200):
+    
     while True:
         n = random.randrange(low_bound, high_bound)
         if n%2==0 or n%3==0 or n%5==0 or n%7==0 or n%13==0:
@@ -73,23 +74,63 @@ def extendedGCD(a, b):
         y2 = y
     return(x1, y1, a)
 
-if __name__ == "__main__":
-    print(fermat_test_prime(13))
-    print(fermat_test_prime(17))
-    print(fermat_test_prime(173))
-    print(fermat_test_prime(1447))
-    t1 = generate_prime()
-    t2 = generate_prime()
-    n = t1*t2
-    euler_n = (t1-1)*(t2-1)
+def encrypt(msg,e,pubkey):
+
+    bytes_of_msg = bytes(msg, "utf-8")
+    print(bytes_of_msg)
+    datas = []
+    for x in bytes_of_msg:
+        datas.append(pow(x,e,pubkey))
+    
+    return json.dumps(datas)
+
+    
+def decrypt(msg, pubkey ,pvtkey):
+    datas = json.loads(msg )
+    
+    decrypted_datas = []
+    for x in datas:
+        tmp = pow(x, pvtkey, pubkey)
+        decrypted_datas.append(tmp)
+    msg = array.array('B', decrypted_datas).tostring()
+    return msg.decode('utf-8')
+
+def demo():
+    msg = input("please input a msg :")
+    p = generate_prime()
+    q = generate_prime()
+    n = p*q
+    euler_n = (p-1)*(q-1)
     e = generate_e(euler_n)
     pvtkey = generate_pvtkey(e, euler_n)
-    pubkey = (e, n)
-    msg = 10
-    print("message: %d"%msg)
-    print("pubkey  e:%d n:%d"%pubkey)
-    print("pvtkey %d"%pvtkey)
-    encrypted_msg = pow(msg, e, n)
-    print("encrypted msg: %d"%encrypted_msg)
-    decrypted_msg = pow(encrypted_msg, pvtkey, n)
-    print("decrypted msg: %d"%decrypted_msg)
+    pubkey =  n
+    enctrpted_msg = encrypt(msg,e, pubkey)
+    decrypted_msg = decrypt(enctrpted_msg, pubkey, pvtkey)
+
+    
+    print("="*30)
+    print("="*30)
+    print("the enctyped msg is :",enctrpted_msg,)
+    print("="*30)
+    print("="*30)
+    print("the decryted msg is:",decrypted_msg)
+
+if __name__ == "__main__":
+  
+    # t1 = generate_prime()
+    # t2 = generate_prime()
+    # n = t1*t2
+    # euler_n = (t1-1)*(t2-1)
+    # e = generate_e(euler_n)
+    # pvtkey = generate_pvtkey(e, euler_n)
+    # pubkey =  n
+    
+    # msg = 10
+    # encrypted = pow(msg,e,n)
+    # print(encrypted)
+    # print(pow(encrypted, pvtkey, pubkey))
+    # enctrpted_msg = encrypt("sdasd",e, pubkey)
+    # decrypted_msg = decrypt(enctrpted_msg,pubkey ,pvtkey)
+    # print(enctrpted_msg)
+    # print(decrypted_msg)
+    demo()
