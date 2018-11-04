@@ -23,19 +23,19 @@ def fermat_test_prime(n, times=3):
             return False
     return True
 
-def generate_prime(low_bound=2**1000, high_bound=2**1200):
+def generate_prime(lower_bound=2**1000, higher_bound=2**1200):
     
     while True:
-        n = random.randrange(low_bound, high_bound)
+        n = random.randrange(lower_bound, higher_bound)
         if n%2==0 or n%3==0 or n%5==0 or n%7==0 or n%13==0:
             continue
         if fermat_test_prime(n):
             return n
 
 
-def generate_e(euler_n):
+def generate_e(euler_n,lower_bound=2**100,higher_bound=2**110):
     while True:
-        n = random.randrange(2**10)
+        n = random.randrange(lower_bound, higher_bound)
         if gcd(n,euler_n) == 1:
             return n
 
@@ -46,8 +46,10 @@ def generate_pvtkey(e, euler_n):
         if y < 0:
             return fn + y
         return y
-    return computeD(euler_n, e)
-
+    for _ in range(100):
+        res = computeD(euler_n, e) 
+        if bin_len(res) > 2048:
+            return res
 def extendedGCD(a, b):
     #a*xi + b*yi = ri
     if b == 0:
@@ -77,7 +79,7 @@ def extendedGCD(a, b):
 def encrypt(msg,e,pubkey):
 
     bytes_of_msg = bytes(msg, "utf-8")
-    print(bytes_of_msg)
+    # print(bytes_of_msg)
     datas = []
     for x in bytes_of_msg:
         datas.append(pow(x,e,pubkey))
@@ -95,7 +97,7 @@ def decrypt(msg, pubkey ,pvtkey):
     msg = array.array('B', decrypted_datas).tostring()
     return msg.decode('utf-8')
 
-def demo():
+def demo1():
     msg = input("please input a msg :")
     p = generate_prime()
     q = generate_prime()
@@ -110,27 +112,20 @@ def demo():
     
     print("="*30)
     print("="*30)
-    print("the enctyped msg is :",enctrpted_msg,)
+    print("the enctyped msg is: ",enctrpted_msg,)
     print("="*30)
     print("="*30)
-    print("the decryted msg is:",decrypted_msg)
+    print("the decryted msg is: ",decrypted_msg)
+    print("="*30)
+    print("="*30)
+    print("[+] public key len: ",bin_len(n)," (bit)")
+    print("[+] phi-n  len: ", bin_len(euler_n), " (bit)")
+    print("[+] e len: ", bin_len(e), '(bit)' )
+    print("[+] private key len: ",bin_len(pvtkey)," (bit)")
+
+def bin_len(a):
+    return len(bin(a)[2:])
 
 if __name__ == "__main__":
-  
-    # t1 = generate_prime()
-    # t2 = generate_prime()
-    # n = t1*t2
-    # euler_n = (t1-1)*(t2-1)
-    # e = generate_e(euler_n)
-    # pvtkey = generate_pvtkey(e, euler_n)
-    # pubkey =  n
-    
-    # msg = 10
-    # encrypted = pow(msg,e,n)
-    # print(encrypted)
-    # print(pow(encrypted, pvtkey, pubkey))
-    # enctrpted_msg = encrypt("sdasd",e, pubkey)
-    # decrypted_msg = decrypt(enctrpted_msg,pubkey ,pvtkey)
-    # print(enctrpted_msg)
-    # print(decrypted_msg)
-    demo()
+   
+    demo1()
